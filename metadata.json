@@ -1,0 +1,6 @@
+{
+  "name": "Karnexus Software",
+  "description": "Odoo consulting, customization, migration, and Python backend development services built for your business.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
