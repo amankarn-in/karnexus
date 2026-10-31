@@ -97,7 +97,7 @@ This project is fully prepared for a decoupled architecture:
    VITE_API_URL=https://api.karnexus.com
    ```
    *(Replace with your VM's public domain or IP).*
-5. The SPA fallback rule is automatically handled by `public/_redirects` (`/*  /index.html  200`).
+5. Cloudflare Workers / Pages with Static Assets automatically handles client-side routing via `"not_found_handling": "single-page-application"` (or Pages standard fallback). No manual `_redirects` file is needed.
 
 ### B. Deploying Python FastAPI Backend to your VM
 
