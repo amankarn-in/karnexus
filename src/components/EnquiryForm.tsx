@@ -334,6 +334,12 @@ export const EnquiryForm: React.FC = () => {
                 className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-xs transition focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
               >
                 <option value="">Select a service category...</option>
+                <optgroup label="Custom ERP Development (End-to-End)">
+                  <option value="Custom ERP Architecture & Development">Custom ERP Architecture & Development (End-to-End)</option>
+                  <option value="Bespoke ERP Modules (Inventory, Sales, Billing)">Bespoke ERP Modules (Inventory, Sales, Billing)</option>
+                  <option value="Legacy ERP Modernization & Custom Portal">Legacy ERP Modernization & Custom Portal</option>
+                  <option value="Executive BI Dashboards & Reporting">Executive BI Dashboards & Reporting</option>
+                </optgroup>
                 <optgroup label="Odoo Services">
                   <option value="Odoo Implementation">Odoo Implementation</option>
                   <option value="Odoo Version Migration">Odoo Version Migration</option>

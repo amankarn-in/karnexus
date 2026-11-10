@@ -162,8 +162,3 @@ sudo certbot --nginx -d api.karnexus.com
   - `public/robots.txt`
   - `public/sitemap.xml`
 
----
-
-## 6. Regulatory & Independence Notice
-
-Karnexus Software is an independent software services consultancy. It is not officially affiliated with or endorsed by Odoo S.A.

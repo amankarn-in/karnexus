@@ -38,6 +38,7 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { label: 'Home', href: '/' },
+    { label: 'Custom ERP', href: '/custom-erp-development' },
     { label: 'Odoo Services', href: '/odoo-services' },
     { label: 'Editions & Hosting', href: '/odoo-editions-and-hosting' },
     { label: 'Odoo FAQs', href: '/odoo-faqs' },
@@ -89,7 +90,7 @@ export const Navbar: React.FC = () => {
                 {siteConfig.companyName}
               </span>
               <span className="text-[11px] font-medium tracking-wide uppercase text-slate-500">
-                Odoo &bull; Python Backend
+                Custom ERP &bull; Systems Engineering
               </span>
             </div>
           </Link>

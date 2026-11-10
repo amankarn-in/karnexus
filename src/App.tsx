@@ -3,6 +3,7 @@ import { RouterProvider, useRouter } from './context/RouterContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
+import { CustomErpServicesPage } from './pages/CustomErpServicesPage';
 import { OdooServicesPage } from './pages/OdooServicesPage';
 import { PythonServicesPage } from './pages/PythonServicesPage';
 import { OdooEditionsAndHostingPage } from './pages/OdooEditionsAndHostingPage';
@@ -18,6 +19,8 @@ const AppContent: React.FC = () => {
     switch (currentPath) {
       case '/':
         return <HomePage />;
+      case '/custom-erp-development':
+        return <CustomErpServicesPage />;
       case '/odoo-services':
         return <OdooServicesPage />;
       case '/python-development':

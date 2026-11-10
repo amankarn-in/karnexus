@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 
 export type RoutePath =
   | '/'
+  | '/custom-erp-development'
   | '/odoo-services'
   | '/python-development'
   | '/odoo-editions-and-hosting'
@@ -74,7 +75,10 @@ export const RouterProvider: React.FC<RouterProviderProps> = ({ children }) => {
     let title = 'Karnexus Software – Odoo Consulting & Python Development';
     let desc = 'Karnexus Software provides Odoo implementation, migration, customization, custom modules, integrations, and Python backend development built around your business.';
 
-    if (path === '/odoo-services') {
+    if (path === '/custom-erp-development') {
+      title = 'Custom ERP Development & Engineering – Karnexus Software';
+      desc = 'Bespoke end-to-end custom ERP systems engineered from the ground up: inventory, sales pipelines, custom billing, and customer portals with 100% code ownership.';
+    } else if (path === '/odoo-services') {
       title = 'Odoo ERP Services & Consulting – Karnexus Software';
       desc = 'Comprehensive Odoo services: Implementation, version migration, workflow customization, custom module development, third-party integrations, support, and Docker deployment.';
     } else if (path === '/python-development') {

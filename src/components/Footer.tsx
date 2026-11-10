@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from '../context/RouterContext';
 import { siteConfig, odooServices, pythonServices } from '../config/site';
-import { Mail, MapPin, ArrowUpRight, ShieldCheck, Phone, MessageSquare } from 'lucide-react';
+import { Mail, MapPin, ArrowUpRight, Phone, MessageSquare } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -86,13 +86,62 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
+          {/* Custom ERP Column */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+              Custom ERP Systems
+            </h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link
+                  href="/custom-erp-development#custom-erp-architecture"
+                  className="text-slate-400 hover:text-white transition-colors block py-0.5"
+                >
+                  Bespoke ERP Architecture
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/custom-erp-development#core-erp-modules"
+                  className="text-slate-400 hover:text-white transition-colors block py-0.5"
+                >
+                  Full-Cycle Modular ERP
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/custom-erp-development#hybrid-erp-integration"
+                  className="text-slate-400 hover:text-white transition-colors block py-0.5"
+                >
+                  Hybrid Modernization
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/custom-erp-development#analytics-dashboards"
+                  className="text-slate-400 hover:text-white transition-colors block py-0.5"
+                >
+                  BI & Reporting Dashboards
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/custom-erp-development"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-indigo-300 hover:text-indigo-200 pt-1"
+                >
+                  View Custom ERP Services <ArrowUpRight className="h-3 w-3" />
+                </Link>
+              </li>
+            </ul>
+          </div>
+
           {/* Odoo Services Column */}
           <div className="space-y-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-teal-400">
               Odoo Services
             </h3>
             <ul className="space-y-2 text-sm">
-              {odooServices.slice(0, 4).map((service) => (
+              {odooServices.slice(0, 3).map((service) => (
                 <li key={service.id}>
                   <Link
                     href={`/odoo-services#${service.id}`}
@@ -116,14 +165,6 @@ export const Footer: React.FC = () => {
                   className="text-teal-300 hover:text-white transition-colors block py-0.5 font-medium"
                 >
                   Odoo ERP FAQs
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/odoo-services"
-                  className="inline-flex items-center gap-1 text-xs font-medium text-teal-300 hover:text-teal-200 pt-1"
-                >
-                  View All Odoo Services <ArrowUpRight className="h-3 w-3" />
                 </Link>
               </li>
             </ul>
@@ -186,19 +227,8 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Regulatory & Independent Disclaimer */}
-        <div className="mt-12 rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-xs text-slate-400 leading-relaxed">
-          <div className="flex items-start gap-2.5">
-            <ShieldCheck className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
-            <div>
-              <span className="font-semibold text-slate-300">Independent Provider Notice: </span>
-              {siteConfig.disclaimer}
-            </div>
-          </div>
-        </div>
-
         {/* Bottom Bar */}
-        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-6 text-xs text-slate-500 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-6 text-xs text-slate-500 sm:flex-row">
           <p>
             &copy; {currentYear} {siteConfig.companyName}. All rights reserved.
           </p>

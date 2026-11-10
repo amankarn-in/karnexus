@@ -13,6 +13,7 @@ import {
   Mail,
   MapPin,
   CheckCircle2,
+  Sparkles,
 } from 'lucide-react';
 
 export const AboutPage: React.FC = () => {
@@ -32,7 +33,7 @@ export const AboutPage: React.FC = () => {
             </h1>
 
             <p className="text-lg text-slate-600 leading-relaxed">
-              An independent software services consultancy providing hands-on freelance Odoo ERP engineering and Python backend development.
+              An independent engineering practice delivering end-to-end custom ERP systems, Odoo consulting, and resilient full-stack Python backend architectures.
             </p>
           </div>
         </div>
@@ -70,6 +71,10 @@ export const AboutPage: React.FC = () => {
                   Practical Technical Stack
                 </h3>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-xs text-slate-700">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-indigo-600 shrink-0" />
+                    <span><strong>Custom ERP:</strong> End-to-end domain modeling, portals, zero seat fees</span>
+                  </div>
                   <div className="flex items-center gap-2">
                     <Layers className="h-4 w-4 text-purple-600 shrink-0" />
                     <span><strong>Odoo ERP:</strong> Versions 15–18, OWL, QWeb, XML-RPC</span>
@@ -179,14 +184,14 @@ export const AboutPage: React.FC = () => {
                 </Link>
               </div>
 
-              {/* Independent Provider Notice */}
+              {/* Confidentiality & Engineering Standards */}
               <div className="rounded-xl border border-slate-200 bg-white p-5 text-xs text-slate-600 space-y-2">
                 <div className="flex items-center gap-2 font-bold text-slate-900">
-                  <ShieldCheck className="h-4 w-4 text-slate-500" />
-                  <span>Independent Provider Notice</span>
+                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                  <span>Confidentiality & Engineering Standards</span>
                 </div>
                 <p className="leading-relaxed text-slate-500">
-                  Karnexus Software is an independent software development practice. We are not officially affiliated with, endorsed by, or an official partner of Odoo S.A. All Odoo product names and trademarks remain the property of their respective holders.
+                  All engagements operate under strict non-disclosure terms. Your business data, proprietary workflows, and custom codebases are treated with enterprise confidentiality, with 100% of all intellectual property belonging exclusively to your company.
                 </p>
               </div>
             </div>

@@ -33,7 +33,6 @@ export interface SiteConfig {
     primaryCta: string;
     secondaryCta: string;
   };
-  disclaimer: string;
 }
 
 export const siteConfig: SiteConfig = {
@@ -42,9 +41,9 @@ export const siteConfig: SiteConfig = {
   baseUrl: 'https://karnexus.com',
   founder: {
     name: 'Senior Freelance Engineer',
-    role: 'Principal Odoo & Python Specialist',
-    bio: 'Independent freelance software engineering practice delivering hands-on Odoo ERP implementations and robust Python backend systems. Direct technical communication without layers of account management.',
-    skills: ['Odoo ERP', 'Python', 'FastAPI', 'Django', 'PostgreSQL', 'Docker', 'RESTful APIs', 'JavaScript', 'Linux Systems'],
+    role: 'Principal ERP Architect & Full-Stack Systems Specialist',
+    bio: 'Independent software engineering practice delivering end-to-end custom ERP systems, Odoo implementations, and robust full-stack & Python backend architectures. Direct technical communication without agency overhead.',
+    skills: ['Custom ERP Architecture', 'Odoo ERP', 'Python', 'FastAPI', 'Django', 'React / TypeScript', 'PostgreSQL', 'Docker', 'RESTful APIs', 'Microservices', 'Linux Systems'],
   },
   contact: {
     email: 'contact@karnexus.com',
@@ -54,26 +53,138 @@ export const siteConfig: SiteConfig = {
     location: 'India',
   },
   hero: {
-    headline: 'Odoo expertise. Python innovation. Software built for your business.',
+    headline: 'Custom ERP systems. Odoo expertise. Software engineered for your business.',
     subheadline:
-      'Karnexus Software helps businesses implement, customize, migrate, and integrate Odoo, while building Python applications, APIs, and automation tailored to their workflows.',
+      'Karnexus Software engineers end-to-end custom ERP platforms tailored to your unique operational DNA, while providing specialized Odoo consulting, customizations, migrations, and scalable backend integrations.',
     primaryCta: 'Discuss Your Project',
     secondaryCta: 'Explore Our Services',
   },
-  disclaimer:
-    'Karnexus Software is an independent software services provider specializing in Odoo and Python engineering. We are not officially affiliated with or endorsed by Odoo S.A.',
 };
 
 export interface ServiceItem {
   id: string;
   title: string;
-  category: 'odoo' | 'python';
+  category: 'custom-erp' | 'odoo' | 'python';
   shortDescription: string;
   businessProblem: string;
   scopeOfEngagement: string[];
   deliverables: string[];
   techStack?: string[];
 }
+
+export const customErpServices: ServiceItem[] = [
+  {
+    id: 'custom-erp-architecture',
+    title: 'Bespoke ERP Architecture & Domain Modeling',
+    category: 'custom-erp',
+    shortDescription:
+      'Purpose-built enterprise resource planning platforms engineered from the ground up to reflect your proprietary business processes without compromise.',
+    businessProblem:
+      'Commercial off-the-shelf ERPs force businesses into generic, rigid workflows, charging steep recurring per-seat fees while leaving core operational bottlenecks unsolved.',
+    scopeOfEngagement: [
+      'Deep operational process audit, value-stream mapping, and stakeholder interviews',
+      'Domain-driven architectural design (DDD) isolating business entities and transactional boundaries',
+      'Relational database schema modeling (PostgreSQL / MySQL) with strict referential integrity and performance indexing',
+      'Role-based access control (RBAC), multi-tenant isolation, and data governance policies',
+      'Modern modular UI/UX prototyping tailored to daily data entry speeds and operational ergonomics',
+    ],
+    deliverables: [
+      'Comprehensive Technical Architecture Blueprint & Data Dictionary',
+      'Entity Relationship Diagrams (ERD) and State Machine Workflows',
+      'Interactive Figma UI/UX component design system',
+      'High-throughput database schema migrations with automated seeding',
+    ],
+    techStack: ['PostgreSQL', 'Python / Go / Node.js', 'React / TypeScript', 'Docker', 'Domain-Driven Design'],
+  },
+  {
+    id: 'core-erp-modules',
+    title: 'Full-Cycle Modular ERP Development',
+    category: 'custom-erp',
+    shortDescription:
+      'Complete end-to-end development of core modules: Inventory, Sales Order Processing, Procurement, Multi-Warehouse Logistics, Invoicing, and HR.',
+    businessProblem:
+      'Disparate SaaS applications leave teams copy-pasting between isolated accounting tools, spreadsheets, and inventory trackers, causing billing leaks and stockouts.',
+    scopeOfEngagement: [
+      'Order-to-Cash (O2C) pipeline with customized automated approval thresholds',
+      'Procure-to-Pay (P2P) automation, purchase requisitions, and vendor quotation comparisons',
+      'Real-time multi-location inventory tracking with batch, serial number, and FIFO/LIFO valuation',
+      'General ledger, accounts receivable/payable, automated invoicing, and tax calculations',
+      'Field personnel dispatch, service ticketing, and time-tracking modules',
+    ],
+    deliverables: [
+      'Fully functional custom web and mobile-responsive ERP interface',
+      'Automated transactional business rules engine',
+      'Audit log trail tracking all record modifications and user actions',
+      'Comprehensive unit and end-to-end regression test suites',
+    ],
+    techStack: ['FastAPI / Django', 'React / Next.js', 'PostgreSQL', 'Redis', 'Tailwind CSS'],
+  },
+  {
+    id: 'hybrid-erp-integration',
+    title: 'Hybrid ERP & Core Modernization',
+    category: 'custom-erp',
+    shortDescription:
+      'Extending or re-architecting existing ERP platforms with high-performance custom microservices, custom portals, and modern customer portals.',
+    businessProblem:
+      'Replacing a legacy ERP entirely can be risky and costly, while out-of-the-box customer portals are slow, clunky, and difficult for non-technical clients to use.',
+    scopeOfEngagement: [
+      'Architecting headless API gateways connecting legacy databases to modern interfaces',
+      'Custom customer & vendor self-service portals (order placement, tracking, statements, invoices)',
+      'Sub-system modernization: extracting slow batch tasks into asynchronous worker queues',
+      'Real-time data synchronization between legacy ERP cores and modern web services',
+    ],
+    deliverables: [
+      'Dedicated Customer / Vendor Portal with secure SSO / JWT authentication',
+      'High-performance REST / GraphQL API layer bridging internal systems',
+      'Automated background sync workers with dead-letter failure queues',
+    ],
+    techStack: ['Python FastAPI', 'React', 'RabbitMQ / Celery', 'Docker', 'PostgreSQL / SQL Server'],
+  },
+  {
+    id: 'analytics-dashboards',
+    title: 'Enterprise Analytics, BI & Automated Reporting',
+    category: 'custom-erp',
+    shortDescription:
+      'Live executive dashboards, multi-department KPI trackers, automated PDF report generation, and data warehouse connectivity.',
+    businessProblem:
+      'Executives wait days for manual Excel compilations to assess sales performance, inventory turnover, or cash flow projections.',
+    scopeOfEngagement: [
+      'Design of read-replica analytical data models and continuous aggregation views',
+      'Interactive executive dashboards visualizing real-time revenue, gross margin, and backlogs',
+      'Automated scheduled report distribution via email, Slack, or webhook',
+      'Connectors for external business intelligence tools (Power BI, Metabase, Tableau)',
+      'Custom PDF / Excel document generation engines (invoices, packing slips, audit manifests)',
+    ],
+    deliverables: [
+      'Real-time analytics dashboard with granular date-range and branch filtering',
+      'Automated PDF report generation engine with custom corporate branding',
+      'Optimized database views preventing analytical load from impacting operational transactions',
+    ],
+    techStack: ['PostgreSQL Analytical Views', 'Metabase / Power BI', 'Pandas', 'Chart.js / Recharts', 'Python'],
+  },
+  {
+    id: 'deployment-governance',
+    title: 'Cloud Infrastructure, Multi-Cloud & Handover',
+    category: 'custom-erp',
+    shortDescription:
+      'Enterprise cloud infrastructure setup on AWS, GCP, Azure, or Private Cloud with complete code handover and zero vendor lock-in.',
+    businessProblem:
+      'Proprietary ERP vendors hold your company data hostage with exorbitant migration penalties and restrictive service agreements.',
+    scopeOfEngagement: [
+      'Containerized multi-environment infrastructure (Development, Staging, Production) using Docker & Kubernetes',
+      'Automated CI/CD build pipelines with zero-downtime rolling deployments',
+      'Automated encrypted offsite database snapshots with point-in-time recovery (PITR)',
+      'Security hardening: OWASP compliance, SSL/TLS termination, rate limiting, and DDoS protection',
+      'Complete code ownership transfer: clean Git repositories, comprehensive documentation, and engineering runbooks',
+    ],
+    deliverables: [
+      'Infrastructure as Code (IaC) or reproducible Docker Compose configurations',
+      'Automated disaster recovery procedure and tested rollback runbooks',
+      'Full intellectual property and 100% repository ownership handover',
+    ],
+    techStack: ['Docker', 'AWS / DigitalOcean / Hetzner', 'NGINX', 'PostgreSQL', 'GitHub Actions'],
+  },
+];
 
 export const odooServices: ServiceItem[] = [
   {
@@ -472,6 +583,21 @@ export interface ExampleSolution {
 
 export const exampleSolutions: ExampleSolution[] = [
   {
+    id: 'bespoke-industrial-erp',
+    title: 'End-to-End Bespoke Operations & Manufacturing ERP',
+    category: 'Custom ERP Engineering',
+    problemScenario:
+      'A specialized industrial manufacturer outgrew rigid commercial ERPs that could not accommodate their multi-level bill of materials (BOM), custom job-shop routing, and tiered quality inspection gates.',
+    architecturalSolution:
+      'Engineered a complete bespoke web ERP platform from domain modeling to deployment: FastAPI microservices, responsive React/TypeScript UI, multi-warehouse batch tracking, dynamic shop-floor scheduling, and client portals with zero recurring seat fees.',
+    technologies: ['React / TypeScript', 'FastAPI', 'PostgreSQL', 'Docker', 'Celery', 'Tailwind CSS'],
+    keyOutcomes: [
+      'Eliminated $50k+ in annual recurring per-user SaaS license fees',
+      'Real-time shop-floor scheduling and automated material reservation',
+      '100% intellectual property ownership with zero vendor lock-in',
+    ],
+  },
+  {
     id: 'ecommerce-sync',
     title: 'Odoo & E-Commerce Synchronization',
     category: 'Odoo Integration',
@@ -554,6 +680,11 @@ export interface FaqItem {
 }
 
 export const faqs: FaqItem[] = [
+  {
+    question: 'When should we build a custom ERP instead of using Odoo or other commercial software?',
+    answer:
+      'Choose custom ERP development when your business possesses proprietary, competitive workflows that generic software forces you to compromise on, or when per-seat SaaS license fees scale unsustainably with your team size. If your workflows match standard accounting and CRM patterns, an Odoo implementation or hybrid extension is faster to roll out. We provide an honest architectural assessment to help you choose the most cost-effective path.',
+  },
   {
     question: 'Which versions of Odoo do you support?',
     answer:

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from '../context/RouterContext';
 import {
   siteConfig,
+  customErpServices,
   odooServices,
   pythonServices,
   commonChallenges,
@@ -26,6 +27,7 @@ import {
   Zap,
   ExternalLink,
   HelpCircle,
+  Sparkles,
 } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -45,7 +47,7 @@ export const HomePage: React.FC = () => {
             <div className="lg:col-span-6 space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50/70 px-3.5 py-1 text-xs font-semibold text-indigo-900">
                 <span className="h-1.5 w-1.5 rounded-full bg-indigo-600 animate-pulse" />
-                <span>Independent Freelance Odoo & Python Engineering</span>
+                <span>Independent Custom ERP & Systems Engineering</span>
               </div>
 
               <h1 className="text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl lg:text-5.5xl leading-[1.12]">
@@ -78,11 +80,15 @@ export const HomePage: React.FC = () => {
               <div className="pt-4 border-t border-slate-200/80 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs text-slate-600">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                  <span>Direct contact with your lead engineer</span>
+                  <span>Direct contact with lead engineer</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                  <span>Maintainable, upgrade-safe code</span>
+                  <span>100% IP & source code ownership</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <span>Zero recurring per-seat SaaS license fees</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
@@ -110,12 +116,60 @@ export const HomePage: React.FC = () => {
               Core Engineering Services
             </h2>
             <p className="text-slate-600 text-base leading-relaxed">
-              We specialize in two tightly coupled disciplines: enterprise ERP systems powered by Odoo, and scalable backend microservices powered by Python.
+              We engineer tailor-made enterprise systems across three primary pillars: end-to-end bespoke custom ERPs, modular Odoo ERP implementations, and high-performance Python microservices.
             </p>
           </div>
 
-          <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-2">
-            {/* Odoo Group Card */}
+          <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-3">
+            {/* 1. Custom ERP Group Card (Flagship) */}
+            <div className="relative rounded-2xl border-2 border-indigo-500/80 bg-linear-to-b from-indigo-50/40 via-white to-slate-50/60 p-8 flex flex-col justify-between shadow-xs transition hover:border-indigo-600 hover:shadow-md">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700">
+                    <Sparkles className="h-6 w-6" />
+                  </div>
+                  <span className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-bold text-white shadow-xs">
+                    Flagship Service
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-950">Custom ERP Development</h3>
+                  <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                    End-to-end bespoke enterprise platforms built around your unique operational DNA. 100% intellectual property ownership, zero forced vendor lock-in, and zero monthly per-seat subscription penalties.
+                  </p>
+                </div>
+
+                <div className="space-y-3 pt-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+                    Key Deliverables:
+                  </span>
+                  <ul className="space-y-2.5 text-sm text-slate-700">
+                    {customErpServices.slice(0, 4).map((s) => (
+                      <li key={s.id} className="flex items-start gap-2.5">
+                        <CheckCircle2 className="h-4 w-4 text-indigo-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="font-semibold text-slate-900">{s.title}: </strong>
+                          <span className="text-slate-600">{s.shortDescription}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-indigo-100">
+                <Link
+                  href="/custom-erp-development"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-700 hover:text-indigo-900 transition"
+                >
+                  <span>Explore End-to-End Custom ERP Systems</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+
+            {/* 2. Odoo Group Card */}
             <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-8 flex flex-col justify-between transition hover:border-slate-300">
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -128,7 +182,7 @@ export const HomePage: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-2xl font-bold text-slate-950">Odoo Consulting & Development</h3>
+                  <h3 className="text-2xl font-bold text-slate-950">Odoo Consulting & Modules</h3>
                   <p className="mt-2 text-sm text-slate-600 leading-relaxed">
                     From fresh rollouts to high-stakes version migrations and intricate custom modules. We build ERP workflows that match your exact business logic without hacking core code.
                   </p>
@@ -163,7 +217,7 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Python Group Card */}
+            {/* 3. Python Group Card */}
             <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-8 flex flex-col justify-between transition hover:border-slate-300">
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
