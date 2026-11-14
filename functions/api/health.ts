@@ -31,12 +31,12 @@ export async function onRequestGet(context: {
   env: Env;
 }): Promise<Response> {
   const hasGmail = Boolean(
-    (context.env.GMAIL_USER || context.env.SMTP_USER) &&
-      (context.env.GMAIL_APP_PASSWORD || context.env.SMTP_PASS)
+    (context.env.GMAIL_USER || context.env.SMTP_USER)?.trim() &&
+      (context.env.GMAIL_APP_PASSWORD || context.env.SMTP_PASS)?.trim()
   );
-  const hasResend = Boolean(context.env.RESEND_API_KEY);
-  const hasBrevo = Boolean(context.env.BREVO_API_KEY);
-  const hasSendGrid = Boolean(context.env.SENDGRID_API_KEY);
+  const hasResend = Boolean(context.env.RESEND_API_KEY?.trim());
+  const hasBrevo = Boolean(context.env.BREVO_API_KEY?.trim());
+  const hasSendGrid = Boolean(context.env.SENDGRID_API_KEY?.trim());
 
   const isEmailConfigured = hasResend || hasGmail || hasBrevo || hasSendGrid;
   const provider = hasResend
@@ -56,6 +56,11 @@ export async function onRequestGet(context: {
       runtime: 'Cloudflare Edge V8',
       provider,
       emailConfigured: isEmailConfigured,
+      envDetected: {
+        RESEND_API_KEY: hasResend,
+        FROM_EMAIL: Boolean(context.env.FROM_EMAIL?.trim()),
+        NOTIFICATION_EMAIL: Boolean(context.env.NOTIFICATION_EMAIL?.trim()),
+      },
       timestamp: new Date().toISOString(),
     }),
     {

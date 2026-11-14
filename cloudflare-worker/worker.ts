@@ -65,13 +65,16 @@ export default {
 
     // Health check endpoint
     if (url.pathname === '/api/health' || url.pathname === '/health') {
-      const hasResend = Boolean(env.RESEND_API_KEY);
-      const hasGmail = Boolean(
-        (env.GMAIL_USER || env.SMTP_USER) &&
-          (env.GMAIL_APP_PASSWORD || env.SMTP_PASS)
-      );
-      const hasBrevo = Boolean(env.BREVO_API_KEY);
-      const hasSendGrid = Boolean(env.SENDGRID_API_KEY);
+      const resendKey = env.RESEND_API_KEY?.trim();
+      const gmailUser = (env.GMAIL_USER || env.SMTP_USER)?.trim();
+      const gmailPass = (env.GMAIL_APP_PASSWORD || env.SMTP_PASS)?.trim();
+      const brevoKey = env.BREVO_API_KEY?.trim();
+      const sendgridKey = env.SENDGRID_API_KEY?.trim();
+
+      const hasResend = Boolean(resendKey);
+      const hasGmail = Boolean(gmailUser && gmailPass);
+      const hasBrevo = Boolean(brevoKey);
+      const hasSendGrid = Boolean(sendgridKey);
 
       const isEmailConfigured = hasResend || hasGmail || hasBrevo || hasSendGrid;
       const provider = hasResend
@@ -91,6 +94,11 @@ export default {
           runtime: 'Cloudflare Edge V8',
           provider,
           emailConfigured: isEmailConfigured,
+          envDetected: {
+            RESEND_API_KEY: hasResend,
+            FROM_EMAIL: Boolean(env.FROM_EMAIL?.trim()),
+            NOTIFICATION_EMAIL: Boolean(env.NOTIFICATION_EMAIL?.trim()),
+          },
           timestamp: new Date().toISOString(),
         }),
         {
@@ -161,8 +169,8 @@ export default {
         );
       }
 
-      const destinationEmail = env.NOTIFICATION_EMAIL || 'contact@karnexus.com';
-      const fromEmail = env.FROM_EMAIL || 'onboarding@resend.dev';
+      const destinationEmail = env.NOTIFICATION_EMAIL?.trim() || 'contact@karnexus.com';
+      const fromEmail = env.FROM_EMAIL?.trim() || 'onboarding@resend.dev';
       const formattedFrom = fromEmail.includes('<')
         ? fromEmail
         : `Karnexus Software <${fromEmail}>`;
@@ -202,12 +210,14 @@ Submitted on: ${new Date().toISOString()}
       `;
 
       try {
+        const resendKey = env.RESEND_API_KEY?.trim();
+
         // Option 1: Resend API (Recommended)
-        if (env.RESEND_API_KEY) {
+        if (resendKey) {
           const resendRes = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
-              Authorization: `Bearer ${env.RESEND_API_KEY}`,
+              Authorization: `Bearer ${resendKey}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
@@ -238,8 +248,8 @@ Submitted on: ${new Date().toISOString()}
         }
 
         // Option 2: Direct Gmail SMTP
-        const gmailUser = env.GMAIL_USER || env.SMTP_USER;
-        const gmailPass = env.GMAIL_APP_PASSWORD || env.SMTP_PASS;
+        const gmailUser = (env.GMAIL_USER || env.SMTP_USER)?.trim();
+        const gmailPass = (env.GMAIL_APP_PASSWORD || env.SMTP_PASS)?.trim();
 
         if (gmailUser && gmailPass) {
           await sendViaGmailSmtp({
@@ -264,11 +274,12 @@ Submitted on: ${new Date().toISOString()}
         }
 
         // Option 3: Brevo API
-        if (env.BREVO_API_KEY) {
+        const brevoKey = env.BREVO_API_KEY?.trim();
+        if (brevoKey) {
           const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
             method: 'POST',
             headers: {
-              'api-key': env.BREVO_API_KEY,
+              'api-key': brevoKey,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
@@ -298,11 +309,12 @@ Submitted on: ${new Date().toISOString()}
         }
 
         // Option 4: SendGrid API
-        if (env.SENDGRID_API_KEY) {
+        const sendgridKey = env.SENDGRID_API_KEY?.trim();
+        if (sendgridKey) {
           const sendgridRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
             method: 'POST',
             headers: {
-              Authorization: `Bearer ${env.SENDGRID_API_KEY}`,
+              Authorization: `Bearer ${sendgridKey}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({

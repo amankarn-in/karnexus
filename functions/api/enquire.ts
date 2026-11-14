@@ -134,8 +134,8 @@ export async function onRequestPost(context: {
     );
   }
 
-  const destinationEmail = env.NOTIFICATION_EMAIL || 'contact@karnexus.com';
-  const fromEmail = env.FROM_EMAIL || 'onboarding@resend.dev';
+  const destinationEmail = env.NOTIFICATION_EMAIL?.trim() || 'contact@karnexus.com';
+  const fromEmail = env.FROM_EMAIL?.trim() || 'onboarding@resend.dev';
 
   const subject = `[Project Enquiry] ${service} - ${name} (${company || 'Individual'})`;
 
@@ -177,12 +177,14 @@ Submitted on: ${new Date().toISOString()}
       ? fromEmail
       : `Karnexus Software <${fromEmail}>`;
 
+    const resendKey = env.RESEND_API_KEY?.trim();
+
     // Option 1: Resend API (Recommended for Cloudflare Edge)
-    if (env.RESEND_API_KEY) {
+    if (resendKey) {
       const resendRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${env.RESEND_API_KEY}`,
+          Authorization: `Bearer ${resendKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -216,8 +218,8 @@ Submitted on: ${new Date().toISOString()}
     }
 
     // Option 2: Direct Gmail SMTP over cloudflare:sockets (Port 465 SSL)
-    const gmailUser = env.GMAIL_USER || env.SMTP_USER;
-    const gmailPass = env.GMAIL_APP_PASSWORD || env.SMTP_PASS;
+    const gmailUser = (env.GMAIL_USER || env.SMTP_USER)?.trim();
+    const gmailPass = (env.GMAIL_APP_PASSWORD || env.SMTP_PASS)?.trim();
 
     if (gmailUser && gmailPass) {
       await sendViaGmailSmtp({
@@ -245,11 +247,12 @@ Submitted on: ${new Date().toISOString()}
     }
 
     // Option B: Brevo API
-    if (env.BREVO_API_KEY) {
+    const brevoKey = env.BREVO_API_KEY?.trim();
+    if (brevoKey) {
       const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
         headers: {
-          'api-key': env.BREVO_API_KEY,
+          'api-key': brevoKey,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -282,11 +285,12 @@ Submitted on: ${new Date().toISOString()}
     }
 
     // Option C: SendGrid API
-    if (env.SENDGRID_API_KEY) {
+    const sendgridKey = env.SENDGRID_API_KEY?.trim();
+    if (sendgridKey) {
       const sendgridRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${env.SENDGRID_API_KEY}`,
+          Authorization: `Bearer ${sendgridKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
