@@ -11,6 +11,7 @@
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
     "deploy:pages": "vite build && wrangler pages deploy dist",
+    "deploy:worker": "node scripts/deploy-worker.mjs",
     "pages:dev": "wrangler pages dev dist"
   },
   "dependencies": {
