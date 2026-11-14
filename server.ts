@@ -16,12 +16,18 @@ app.use(express.json());
 
 // API: Health check & configuration status
 app.get('/api/health', (_req: Request, res: Response) => {
-  const isEmailConfigured = Boolean(
+  const hasGmail = Boolean(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD);
+  const hasResend = Boolean(process.env.RESEND_API_KEY);
+  const hasBrevo = Boolean(process.env.BREVO_API_KEY);
+  const hasSmtp = Boolean(
     process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
   );
+  const isEmailConfigured = hasGmail || hasResend || hasBrevo || hasSmtp;
+
   res.json({
     status: 'ok',
-    service: 'Karnexus Software API',
+    service: 'Karnexus Software API (Cloudflare & Local Dev)',
+    provider: hasResend ? 'Resend' : hasGmail ? 'Gmail SMTP' : hasBrevo ? 'Brevo' : hasSmtp ? 'SMTP' : 'None',
     emailConfigured: isEmailConfigured,
   });
 });
@@ -81,43 +87,30 @@ app.post('/api/enquire', async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  const isEmailConfigured = Boolean(
+  const hasGmail = Boolean(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD);
+  const hasResend = Boolean(process.env.RESEND_API_KEY);
+  const hasBrevo = Boolean(process.env.BREVO_API_KEY);
+  const hasSmtp = Boolean(
     process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
   );
+  const isEmailConfigured = hasGmail || hasResend || hasBrevo || hasSmtp;
 
-  // If email delivery is not configured, do not fake success!
-  // Return clear message explaining unconfigured state and providing direct contact alternative.
   if (!isEmailConfigured) {
     res.status(503).json({
       success: false,
       configured: false,
       error:
-        'Online enquiry dispatch is not currently configured on this server environment. Please email us directly at contact@karnexus.com with your project details.',
+        'Online enquiry dispatch is not currently configured on this environment. Please email us directly at contact@karnexus.com with your project details.',
       contactEmail: 'contact@karnexus.com',
     });
     return;
   }
 
-  try {
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587,
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+  const destinationEmail = process.env.NOTIFICATION_EMAIL || 'contact@karnexus.com';
+  const senderEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev';
+  const subject = `[Project Enquiry] ${service} - ${name} (${company || 'Individual'})`;
 
-    const destinationEmail = process.env.NOTIFICATION_EMAIL || 'contact@karnexus.com';
-    const senderEmail = process.env.FROM_EMAIL || process.env.SMTP_USER || 'noreply@karnexus.com';
-
-    const mailOptions = {
-      from: `"Karnexus Website Enquiries" <${senderEmail}>`,
-      to: destinationEmail,
-      replyTo: email,
-      subject: `[Project Enquiry] ${service} - ${name} (${company || 'Individual'})`,
-      text: `
+  const emailText = `
 New Project Enquiry - Karnexus Software
 ---------------------------------------
 Client Name: ${name}
@@ -131,30 +124,122 @@ Project Description:
 ${description}
 
 Submitted on: ${new Date().toISOString()}
-      `.trim(),
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; line-height: 1.6; color: #1e293b;">
-          <h2 style="color: #4338ca; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">New Project Enquiry – Karnexus Software</h2>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
-            <tr><td style="padding: 8px; font-weight: bold; width: 140px;">Client Name:</td><td style="padding: 8px;">${name}</td></tr>
-            <tr><td style="padding: 8px; font-weight: bold;">Work Email:</td><td style="padding: 8px;"><a href="mailto:${email}">${email}</a></td></tr>
-            <tr><td style="padding: 8px; font-weight: bold;">Company:</td><td style="padding: 8px;">${company || 'Not specified'}</td></tr>
-            <tr><td style="padding: 8px; font-weight: bold;">Service Required:</td><td style="padding: 8px;">${service}</td></tr>
-            <tr><td style="padding: 8px; font-weight: bold;">Budget Range:</td><td style="padding: 8px;">${budget || 'Not specified'}</td></tr>
-            <tr><td style="padding: 8px; font-weight: bold;">Timeline:</td><td style="padding: 8px;">${timeline || 'Not specified'}</td></tr>
-          </table>
-          <h3 style="color: #0f172a; margin-top: 24px;">Project Description:</h3>
-          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; white-space: pre-wrap;">${description}</div>
-        </div>
-      `,
-    };
+  `.trim();
 
-    await transporter.sendMail(mailOptions);
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; line-height: 1.6; color: #1e293b;">
+      <h2 style="color: #4338ca; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">New Project Enquiry – Karnexus Software</h2>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+        <tr><td style="padding: 8px; font-weight: bold; width: 140px;">Client Name:</td><td style="padding: 8px;">${name}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Work Email:</td><td style="padding: 8px;"><a href="mailto:${email}">${email}</a></td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Company:</td><td style="padding: 8px;">${company || 'Not specified'}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Service Required:</td><td style="padding: 8px;">${service}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Budget Range:</td><td style="padding: 8px;">${budget || 'Not specified'}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Timeline:</td><td style="padding: 8px;">${timeline || 'Not specified'}</td></tr>
+      </table>
+      <h3 style="color: #0f172a; margin-top: 24px;">Project Description:</h3>
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; white-space: pre-wrap;">${description}</div>
+    </div>
+  `;
 
-    res.json({
-      success: true,
-      configured: true,
-      message: 'Thank you for contacting Karnexus Software. Your enquiry has been received and you will receive a response shortly.',
+  try {
+    const formattedFrom = senderEmail.includes('<')
+      ? senderEmail
+      : `Karnexus Software <${senderEmail}>`;
+
+    // 1. Resend API (Same as Cloudflare Worker / Pages Functions)
+    if (hasResend) {
+      const resendRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: formattedFrom,
+          to: [destinationEmail],
+          reply_to: email,
+          subject,
+          text: emailText,
+          html: emailHtml,
+        }),
+      });
+
+      if (!resendRes.ok) {
+        const errorText = await resendRes.text();
+        throw new Error(`Resend delivery failed: ${errorText}`);
+      }
+
+      res.json({
+        success: true,
+        configured: true,
+        provider: 'Resend',
+        message: 'Thank you for contacting Karnexus Software. Your enquiry has been received.',
+      });
+      return;
+    }
+
+    // 2. Direct Gmail SMTP (Node.js)
+    if (hasGmail) {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: (process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, ''),
+        },
+      });
+
+      await transporter.sendMail({
+        from: `"Karnexus Website Enquiries" <${process.env.GMAIL_USER}>`,
+        to: destinationEmail,
+        replyTo: email,
+        subject,
+        text: emailText,
+        html: emailHtml,
+      });
+
+      res.json({
+        success: true,
+        configured: true,
+        provider: 'Gmail SMTP',
+        message: 'Thank you for contacting Karnexus Software. Your enquiry has been received.',
+      });
+      return;
+    }
+
+    // 2. SMTP Transport
+    if (hasSmtp) {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: `"Karnexus Website Enquiries" <${senderEmail}>`,
+        to: destinationEmail,
+        replyTo: email,
+        subject,
+        text: emailText,
+        html: emailHtml,
+      });
+
+      res.json({
+        success: true,
+        configured: true,
+        message: 'Thank you for contacting Karnexus Software. Your enquiry has been received.',
+      });
+      return;
+    }
+
+    res.status(503).json({
+      success: false,
+      configured: false,
+      error: 'No valid email delivery provider configured.',
     });
   } catch (error: unknown) {
     console.error('Failed to send email:', error);

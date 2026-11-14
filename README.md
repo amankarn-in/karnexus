@@ -78,28 +78,54 @@ Common SMTP providers include Google Workspace / Gmail (App Password), SendGrid,
 
 ---
 
-## 4. Cloudflare Pages + Python FastAPI VM Architecture
+## 4. Cloudflare Pages + Cloudflare Workers Architecture (Recommended)
 
-This project is fully prepared for a decoupled architecture:
-- **Frontend**: Static React + Vite SPA hosted on **Cloudflare Pages** (edge global CDN, free SSL, zero maintenance).
-- **Backend**: **Python FastAPI** service running on a Linux Virtual Machine (Dockerized or systemd) behind NGINX SSL.
+To completely eliminate VM hosting costs, Linux maintenance, and CORS complexities, this project is fully configured for a **unified Cloudflare serverless edge architecture**:
+- **Frontend**: Vite + React SPA served from Cloudflare's global edge network via **Cloudflare Pages**.
+- **Backend API**: Cloudflare Pages Functions (located in `/functions/api`) running as an Edge Cloudflare Worker.
 
-### A. Deploying Frontend to Cloudflare Pages
-1. Push your repository to GitHub or GitLab.
-2. In the [Cloudflare Dashboard](https://dash.cloudflare.com/), go to **Workers & Pages** > **Create application** > **Pages** > **Connect to Git**.
-3. Select your repository with these build settings:
+### Key Efficiency & Architectural Advantages:
+1. **$0/month Infrastructure Cost**: No VPS / VM monthly rental fees ($5–$20/month saved). Cloudflare Pages and Workers include 100,000 requests/day on the free tier.
+2. **Zero Maintenance & No Servers to Crash**: No NGINX configurations, no system updates, no Uvicorn/systemd processes, and no SSL renewal headaches.
+3. **Same-Origin (Zero CORS Headaches)**: The backend API runs under the exact same domain (`https://karnexus.com/api/enquire`). You don't need cross-origin API headers or separate subdomains.
+4. **Single-Step Automatic Deployments**: Pushing to GitHub deploys both the frontend Vite build AND the edge backend worker simultaneously in under 30 seconds.
+5. **Modern HTTP Email API**: Instead of fragile TCP SMTP on a VM, the worker uses modern edge email dispatch via **Resend** (3,000 emails/month free) or **Brevo** (300 emails/day free).
+
+---
+
+### How to Configure & Deploy on Cloudflare Pages
+
+1. **Push your code to GitHub/GitLab**.
+2. Go to **Cloudflare Dashboard** > **Workers & Pages** > **Create application** > **Pages** > **Connect to Git**.
+3. Set your build configuration:
    - **Framework preset**: `Vite`
    - **Build command**: `npm run build`
    - **Build output directory**: `dist`
-   - **Root directory**: `/` (leave blank or set to root)
-4. Under **Environment variables**, set:
-   ```env
-   VITE_API_URL=https://api.karnexus.com
-   ```
-   *(Replace with your VM's public domain or IP).*
-5. Cloudflare Workers / Pages with Static Assets automatically handles client-side routing via `"not_found_handling": "single-page-application"` (or Pages standard fallback). No manual `_redirects` file is needed.
+   - **Root directory**: `/`
+4. Cloudflare Pages automatically detects the `/functions` folder and compiles `/functions/api/enquire.ts` and `/functions/api/health.ts` into native edge Workers!
+5. In your Cloudflare Pages project, go to **Settings** > **Environment variables**, and add:
+   - `RESEND_API_KEY`: Your API key from [resend.com](https://resend.com) (free)
+   - `NOTIFICATION_EMAIL`: `contact@karnexus.com`
+   - `FROM_EMAIL`: `onboarding@resend.dev` (or your verified domain sender like `enquiry@karnexus.com`)
 
-### B. Deploying Python FastAPI Backend to your VM
+*Note: If you leave `VITE_API_URL` empty, the frontend automatically defaults to same-origin `/api/enquire`.*
+
+---
+
+### Alternative: Standalone Cloudflare Worker (`/cloudflare-worker`)
+
+If you prefer deploying the API on a dedicated custom subdomain (e.g. `https://api.karnexus.com`):
+1. Navigate to `/cloudflare-worker`:
+   ```bash
+   cd cloudflare-worker
+   npx wrangler secret put RESEND_API_KEY
+   npx wrangler deploy
+   ```
+2. Set `VITE_API_URL=https://api.karnexus.com` in your Cloudflare Pages environment variables.
+
+---
+
+### Alternative: Python FastAPI on VM (`/backend`)
 
 The complete Python backend code and configuration is located in the **`/backend`** folder:
 - `backend/main.py`: FastAPI app with Pydantic validation, CORS, honeypot spam protection, and async email dispatch.
