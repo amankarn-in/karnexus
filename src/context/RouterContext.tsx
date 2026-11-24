@@ -4,6 +4,7 @@ export type RoutePath =
   | '/'
   | '/custom-erp-development'
   | '/odoo-services'
+  | '/odoo-module-support'
   | '/python-development'
   | '/odoo-editions-and-hosting'
   | '/odoo-faqs'
@@ -12,6 +13,7 @@ export type RoutePath =
 
 interface RouterContextType {
   currentPath: string;
+  currentSearch: string;
   navigate: (path: string, hash?: string) => void;
 }
 
@@ -33,10 +35,14 @@ export const RouterProvider: React.FC<RouterProviderProps> = ({ children }) => {
   const [currentPath, setCurrentPath] = useState<string>(() => {
     return window.location.pathname || '/';
   });
+  const [currentSearch, setCurrentSearch] = useState<string>(() => {
+    return window.location.search || '';
+  });
 
   useEffect(() => {
     const handlePopState = () => {
       setCurrentPath(window.location.pathname || '/');
+      setCurrentSearch(window.location.search || '');
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -44,14 +50,25 @@ export const RouterProvider: React.FC<RouterProviderProps> = ({ children }) => {
   }, []);
 
   const navigate = useCallback((path: string, hash?: string) => {
-    const targetUrl = hash ? `${path}${hash}` : path;
-    if (window.location.pathname !== path || (hash && window.location.hash !== hash)) {
+    const parsed = new URL(path, window.location.origin);
+    const nextPathname = parsed.pathname || '/';
+    const nextSearch = parsed.search || '';
+    const nextHash = hash !== undefined ? hash : parsed.hash || '';
+    const targetUrl = `${nextPathname}${nextSearch}${nextHash}`;
+
+    const hasChanged =
+      window.location.pathname !== nextPathname ||
+      window.location.search !== nextSearch ||
+      (nextHash && window.location.hash !== nextHash);
+
+    if (hasChanged) {
       window.history.pushState({}, '', targetUrl);
-      setCurrentPath(path);
-      
-      if (hash) {
+      setCurrentPath(nextPathname);
+      setCurrentSearch(nextSearch);
+
+      if (nextHash) {
         setTimeout(() => {
-          const el = document.querySelector(hash);
+          const el = document.querySelector(nextHash);
           if (el) {
             el.scrollIntoView({ behavior: 'smooth' });
           } else {
@@ -61,8 +78,8 @@ export const RouterProvider: React.FC<RouterProviderProps> = ({ children }) => {
       } else {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    } else if (hash) {
-      const el = document.querySelector(hash);
+    } else if (nextHash) {
+      const el = document.querySelector(nextHash);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
       }
@@ -81,6 +98,9 @@ export const RouterProvider: React.FC<RouterProviderProps> = ({ children }) => {
     } else if (path === '/odoo-services') {
       title = 'Odoo ERP Services & Consulting – Karnexus Software';
       desc = 'Comprehensive Odoo services: Implementation, version migration, workflow customization, custom module development, third-party integrations, support, and Docker deployment.';
+    } else if (path === '/odoo-module-support') {
+      title = 'Odoo Module Support & Enhancement Requests – Karnexus Software';
+      desc = 'Submit bug reports, setup questions, version upgrade inquiries, or feature enhancement requests for Karnexus Odoo Apps Store modules.';
     } else if (path === '/python-development') {
       title = 'Python Backend & API Development – Karnexus Software';
       desc = 'Robust Python, FastAPI, and Django backend development, REST API integrations, asynchronous automation workers, and data synchronization workflows.';
@@ -106,7 +126,7 @@ export const RouterProvider: React.FC<RouterProviderProps> = ({ children }) => {
   }, [currentPath]);
 
   return (
-    <RouterContext.Provider value={{ currentPath, navigate }}>
+    <RouterContext.Provider value={{ currentPath, currentSearch, navigate }}>
       {children}
     </RouterContext.Provider>
   );
@@ -143,15 +163,17 @@ export const Link: React.FC<LinkProps> = ({ href, className, children, onClick, 
 
     e.preventDefault();
 
-    // Check for hash
-    const [pathPart, hashPart] = href.split('#');
-    const targetPath = pathPart || currentPath;
+    // Check for hash while preserving query params
+    const [pathAndSearch, hashPart] = href.split('#');
+    const targetPath = pathAndSearch || currentPath;
     const targetHash = hashPart ? `#${hashPart}` : undefined;
 
     navigate(targetPath, targetHash);
   };
 
-  const isActive = currentPath === href || (href !== '/' && currentPath.startsWith(href));
+  const hrefPathOnly = href.split('#')[0].split('?')[0];
+  const isActive =
+    currentPath === hrefPathOnly || (hrefPathOnly !== '/' && hrefPathOnly !== '' && currentPath.startsWith(hrefPathOnly));
 
   return (
     <a

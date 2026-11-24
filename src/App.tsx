@@ -5,6 +5,7 @@ import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
 import { CustomErpServicesPage } from './pages/CustomErpServicesPage';
 import { OdooServicesPage } from './pages/OdooServicesPage';
+import { OdooModuleSupportPage } from './pages/OdooModuleSupportPage';
 import { PythonServicesPage } from './pages/PythonServicesPage';
 import { OdooEditionsAndHostingPage } from './pages/OdooEditionsAndHostingPage';
 import { OdooFaqsPage } from './pages/OdooFaqsPage';
@@ -23,6 +24,8 @@ const AppContent: React.FC = () => {
         return <CustomErpServicesPage />;
       case '/odoo-services':
         return <OdooServicesPage />;
+      case '/odoo-module-support':
+        return <OdooModuleSupportPage />;
       case '/python-development':
         return <PythonServicesPage />;
       case '/odoo-editions-and-hosting':

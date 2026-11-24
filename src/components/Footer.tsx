@@ -167,6 +167,14 @@ export const Footer: React.FC = () => {
                   Odoo ERP FAQs
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/odoo-module-support"
+                  className="text-teal-300 hover:text-white transition-colors block py-0.5 font-medium"
+                >
+                  Odoo Module Support
+                </Link>
+              </li>
             </ul>
           </div>
 

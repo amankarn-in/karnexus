@@ -25,7 +25,20 @@ interface Env {
   [key: string]: string | undefined;
 }
 
+interface SupportMeta {
+  ticketId?: string;
+  moduleName?: string;
+  odooVersion?: string;
+  odooEdition?: string;
+  hosting?: string;
+  requestType?: string;
+  orderRef?: string;
+  subjectSummary?: string;
+  traceback?: string;
+}
+
 interface EnquiryPayload {
+  submissionType?: 'project_enquiry' | 'odoo_module_support';
   name?: string;
   email?: string;
   company?: string;
@@ -34,6 +47,7 @@ interface EnquiryPayload {
   timeline?: string;
   description?: string;
   honeypot?: string;
+  supportMeta?: SupportMeta;
 }
 
 const CORS_HEADERS = {
@@ -69,6 +83,7 @@ export async function onRequestPost(context: {
   }
 
   const {
+    submissionType,
     name,
     email,
     company,
@@ -77,6 +92,7 @@ export async function onRequestPost(context: {
     timeline,
     description,
     honeypot,
+    supportMeta,
   } = payload;
 
   // 1. Spam honeypot trap
@@ -137,9 +153,78 @@ export async function onRequestPost(context: {
   const destinationEmail = env.NOTIFICATION_EMAIL?.trim() || 'contact@karnexus.com';
   const fromEmail = env.FROM_EMAIL?.trim() || 'onboarding@resend.dev';
 
-  const subject = `[Project Enquiry] ${service} - ${name} (${company || 'Individual'})`;
+  const isModuleSupport = submissionType === 'odoo_module_support' && Boolean(supportMeta);
+  const submittedAt = new Date().toISOString();
 
-  const emailText = `
+  let subject: string;
+  let emailText: string;
+  let emailHtml: string;
+
+  if (isModuleSupport && supportMeta) {
+    const ticketId = supportMeta.ticketId?.trim() || 'KNX-SUP';
+    const moduleName = supportMeta.moduleName?.trim() || service;
+    const odooVersion = supportMeta.odooVersion?.trim() || 'Not specified';
+    const odooEdition = supportMeta.odooEdition?.trim() || 'Not specified';
+    const hosting = supportMeta.hosting?.trim() || 'Not specified';
+    const requestType = supportMeta.requestType?.trim() || 'Module Support';
+    const orderRef = supportMeta.orderRef?.trim() || 'Not specified';
+    const subjectSummary = supportMeta.subjectSummary?.trim() || 'Module Support Query';
+    const traceback = supportMeta.traceback?.trim() || '';
+
+    subject = `[Odoo Support][${odooVersion}] ${moduleName} — ${requestType} (${ticketId})`;
+
+    emailText = `
+New Odoo Module Support Request - Karnexus Software
+---------------------------------------------------
+Ticket Reference: ${ticketId}
+Request Type: ${requestType}
+Module: ${moduleName}
+Odoo Version: ${odooVersion}
+Odoo Edition: ${odooEdition}
+Hosting Environment: ${hosting}
+Apps Store Order Ref: ${orderRef}
+
+Customer Name: ${name}
+Work Email: ${email}
+Company: ${company || 'Not specified'}
+
+Subject: ${subjectSummary}
+
+Query Details:
+${description}
+${traceback ? `\nError Traceback / Server Log:\n${traceback}\n` : ''}
+Submitted on: ${submittedAt}
+`.trim();
+
+    emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 640px; line-height: 1.6; color: #1e293b;">
+      <h2 style="color: #4338ca; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Odoo Module Support Request (${escapeHtml(ticketId)})</h2>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+        <tr><td style="padding: 8px; font-weight: bold; width: 170px;">Ticket Ref:</td><td style="padding: 8px; font-family: monospace;">${escapeHtml(ticketId)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Request Type:</td><td style="padding: 8px;">${escapeHtml(requestType)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Module:</td><td style="padding: 8px; font-family: monospace;">${escapeHtml(moduleName)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Odoo Version:</td><td style="padding: 8px;">Odoo ${escapeHtml(odooVersion)} (${escapeHtml(odooEdition)})</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Hosting:</td><td style="padding: 8px;">${escapeHtml(hosting)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Apps Order Ref:</td><td style="padding: 8px;">${escapeHtml(orderRef)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Customer Name:</td><td style="padding: 8px;">${escapeHtml(name)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Work Email:</td><td style="padding: 8px;"><a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Company:</td><td style="padding: 8px;">${escapeHtml(company || 'Not specified')}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Subject:</td><td style="padding: 8px;"><strong>${escapeHtml(subjectSummary)}</strong></td></tr>
+      </table>
+      <h3 style="color: #0f172a; margin-top: 24px;">Query Details:</h3>
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; white-space: pre-wrap;">${escapeHtml(description)}</div>
+      ${
+        traceback
+          ? `<h3 style="color: #0f172a; margin-top: 24px;">Error Traceback / Server Log:</h3>
+             <pre style="background-color: #0f172a; color: #f8fafc; border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 12px; line-height: 1.5; white-space: pre-wrap;">${escapeHtml(traceback)}</pre>`
+          : ''
+      }
+    </div>
+  `;
+  } else {
+    subject = `[Project Enquiry] ${service} - ${name} (${company || 'Individual'})`;
+
+    emailText = `
 New Project Enquiry - Karnexus Software
 ---------------------------------------
 Client Name: ${name}
@@ -152,10 +237,10 @@ Expected Timeline: ${timeline || 'Not specified'}
 Project Description:
 ${description}
 
-Submitted on: ${new Date().toISOString()}
+Submitted on: ${submittedAt}
 `.trim();
 
-  const emailHtml = `
+    emailHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; line-height: 1.6; color: #1e293b;">
       <h2 style="color: #4338ca; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">New Project Enquiry – Karnexus Software</h2>
       <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
@@ -170,6 +255,7 @@ Submitted on: ${new Date().toISOString()}
       <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; white-space: pre-wrap;">${escapeHtml(description)}</div>
     </div>
   `;
+  }
 
   // 3. Dispatch via Configured Provider: Resend (Recommended) -> Brevo -> SendGrid -> Gmail SMTP
   try {

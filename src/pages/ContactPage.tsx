@@ -1,9 +1,26 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EnquiryForm } from '../components/EnquiryForm';
 import { siteConfig } from '../config/site';
-import { Mail, MapPin, Clock, ShieldCheck, CheckCircle2, Phone, MessageSquare } from 'lucide-react';
+import { ODOO_VERSIONS, SUPPORT_REQUEST_TYPES, SupportRequestTypeId } from '../config/odooModules';
+import { Link, useRouter } from '../context/RouterContext';
+import {
+  Mail,
+  MapPin,
+  Clock,
+  ShieldCheck,
+  CheckCircle2,
+  Phone,
+  MessageSquare,
+  ArrowRight,
+  LifeBuoy,
+} from 'lucide-react';
 
 export const ContactPage: React.FC = () => {
+  const { navigate } = useRouter();
+  const [quickModule, setQuickModule] = useState<string>('');
+  const [quickVersion, setQuickVersion] = useState<string>('18.0');
+  const [quickType, setQuickType] = useState<SupportRequestTypeId>('bug');
+
   useEffect(() => {
     // Read any query params if user clicked "Request Proposal for this Service"
     const params = new URLSearchParams(window.location.search);
@@ -16,6 +33,16 @@ export const ContactPage: React.FC = () => {
     }
   }, []);
 
+  const handleOpenModuleSupport = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (quickModule.trim()) params.set('module', quickModule.trim());
+    if (quickVersion) params.set('version', quickVersion);
+    if (quickType) params.set('type', quickType);
+    const query = params.toString();
+    navigate(query ? `/odoo-module-support?${query}` : '/odoo-module-support');
+  };
+
   return (
     <div className="flex flex-col">
       {/* Header */}
@@ -24,7 +51,7 @@ export const ContactPage: React.FC = () => {
           <div className="max-w-3xl space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-900">
               <Mail className="h-3.5 w-3.5" />
-              <span>Project Consultation & Enquiries</span>
+              <span>Project Consultation &amp; Enquiries</span>
             </div>
 
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
@@ -143,7 +170,7 @@ export const ContactPage: React.FC = () => {
                 <ul className="space-y-3 text-xs text-slate-600 leading-relaxed">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span><strong>Current System:</strong> Your current Odoo version (e.g. 15, 16, 17) or current backend framework.</span>
+                    <span><strong>Current System:</strong> Your current Odoo version (e.g. 15, 16, 17, 18) or current backend framework.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -151,7 +178,7 @@ export const ContactPage: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span><strong>Scope & Pain Points:</strong> Specific workflows that are causing delays or requiring custom development.</span>
+                    <span><strong>Scope &amp; Pain Points:</strong> Specific workflows that are causing delays or requiring custom development.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -171,6 +198,118 @@ export const ContactPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Bottom Section: Dedicated Odoo Apps Store Module Support */}
+      <section
+        id="odoo-module-support"
+        className="border-t border-slate-200 bg-white py-14 lg:py-16"
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-center rounded-2xl border border-slate-200 bg-slate-50/80 p-6 sm:p-8 lg:p-10">
+            <div className="lg:col-span-6 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-indigo-700">
+                <LifeBuoy className="h-4 w-4 shrink-0" />
+                <span>Odoo Apps Store Customers</span>
+                <span aria-hidden="true" className="text-slate-400">·</span>
+                <span className="text-slate-600">Module Support Portal</span>
+              </div>
+
+              <h2 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl text-balance">
+                Looking for Support on an Odoo Store Module?
+              </h2>
+
+              <p className="text-sm text-slate-600 leading-relaxed max-w-xl">
+                Report a bug, get setup guidance, attach an Odoo traceback, or request a version upgrade or custom feature enhancement on our dedicated module support portal.
+              </p>
+
+              <div className="pt-1">
+                <Link
+                  href="/odoo-module-support"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-700 hover:text-indigo-900 transition whitespace-nowrap"
+                >
+                  <span>Go directly to Odoo Module Support</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+
+            <form
+              onSubmit={handleOpenModuleSupport}
+              className="lg:col-span-6 rounded-xl border border-slate-200 bg-white p-5 sm:p-6 space-y-4"
+            >
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label
+                    htmlFor="contact-quick-module"
+                    className="block text-xs font-semibold text-slate-700 mb-1.5"
+                  >
+                    Module Name <span className="text-slate-400 font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="contact-quick-module"
+                    value={quickModule}
+                    onChange={(e) => setQuickModule(e.target.value)}
+                    placeholder="e.g. knx_sale_approval or App Name"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="contact-quick-version"
+                    className="block text-xs font-semibold text-slate-700 mb-1.5"
+                  >
+                    Odoo Version
+                  </label>
+                  <select
+                    id="contact-quick-version"
+                    value={quickVersion}
+                    onChange={(e) => setQuickVersion(e.target.value)}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 tabular-nums focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
+                  >
+                    {ODOO_VERSIONS.map((version) => (
+                      <option key={version} value={version}>
+                        {version === 'Older / Custom' ? version : `Odoo ${version}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="contact-quick-type"
+                    className="block text-xs font-semibold text-slate-700 mb-1.5"
+                  >
+                    Request Type
+                  </label>
+                  <select
+                    id="contact-quick-type"
+                    value={quickType}
+                    onChange={(e) => setQuickType(e.target.value as SupportRequestTypeId)}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
+                  >
+                    {SUPPORT_REQUEST_TYPES.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 whitespace-nowrap"
+              >
+                <span>Open Module Support Form</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
+

@@ -32,9 +32,19 @@ app.get('/api/health', (_req: Request, res: Response) => {
   });
 });
 
-// API: Project enquiry submission
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// API: Project enquiry & Odoo module support submission
 app.post('/api/enquire', async (req: Request, res: Response): Promise<void> => {
   const {
+    submissionType,
     name,
     email,
     company,
@@ -43,6 +53,7 @@ app.post('/api/enquire', async (req: Request, res: Response): Promise<void> => {
     budget,
     timeline,
     honeypot,
+    supportMeta,
   } = req.body;
 
   // Basic bot/spam protection via honeypot
@@ -108,9 +119,78 @@ app.post('/api/enquire', async (req: Request, res: Response): Promise<void> => {
 
   const destinationEmail = process.env.NOTIFICATION_EMAIL || 'contact@karnexus.com';
   const senderEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev';
-  const subject = `[Project Enquiry] ${service} - ${name} (${company || 'Individual'})`;
+  const isModuleSupport = submissionType === 'odoo_module_support' && Boolean(supportMeta);
+  const submittedAt = new Date().toISOString();
 
-  const emailText = `
+  let subject: string;
+  let emailText: string;
+  let emailHtml: string;
+
+  if (isModuleSupport && supportMeta) {
+    const ticketId = String(supportMeta.ticketId || 'KNX-SUP').trim();
+    const moduleName = String(supportMeta.moduleName || service).trim();
+    const odooVersion = String(supportMeta.odooVersion || 'Not specified').trim();
+    const odooEdition = String(supportMeta.odooEdition || 'Not specified').trim();
+    const hosting = String(supportMeta.hosting || 'Not specified').trim();
+    const requestType = String(supportMeta.requestType || 'Module Support').trim();
+    const orderRef = String(supportMeta.orderRef || 'Not specified').trim();
+    const subjectSummary = String(supportMeta.subjectSummary || 'Module Support Query').trim();
+    const traceback = String(supportMeta.traceback || '').trim();
+
+    subject = `[Odoo Support][${odooVersion}] ${moduleName} — ${requestType} (${ticketId})`;
+
+    emailText = `
+New Odoo Module Support Request - Karnexus Software
+---------------------------------------------------
+Ticket Reference: ${ticketId}
+Request Type: ${requestType}
+Module: ${moduleName}
+Odoo Version: ${odooVersion}
+Odoo Edition: ${odooEdition}
+Hosting Environment: ${hosting}
+Apps Store Order Ref: ${orderRef}
+
+Customer Name: ${name}
+Work Email: ${email}
+Company: ${company || 'Not specified'}
+
+Subject: ${subjectSummary}
+
+Query Details:
+${description}
+${traceback ? `\nError Traceback / Server Log:\n${traceback}\n` : ''}
+Submitted on: ${submittedAt}
+    `.trim();
+
+    emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 640px; line-height: 1.6; color: #1e293b;">
+      <h2 style="color: #4338ca; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Odoo Module Support Request (${escapeHtml(ticketId)})</h2>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+        <tr><td style="padding: 8px; font-weight: bold; width: 170px;">Ticket Ref:</td><td style="padding: 8px; font-family: monospace;">${escapeHtml(ticketId)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Request Type:</td><td style="padding: 8px;">${escapeHtml(requestType)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Module:</td><td style="padding: 8px; font-family: monospace;">${escapeHtml(moduleName)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Odoo Version:</td><td style="padding: 8px;">Odoo ${escapeHtml(odooVersion)} (${escapeHtml(odooEdition)})</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Hosting:</td><td style="padding: 8px;">${escapeHtml(hosting)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Apps Order Ref:</td><td style="padding: 8px;">${escapeHtml(orderRef)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Customer Name:</td><td style="padding: 8px;">${escapeHtml(name)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Work Email:</td><td style="padding: 8px;"><a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Company:</td><td style="padding: 8px;">${escapeHtml(company || 'Not specified')}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Subject:</td><td style="padding: 8px;"><strong>${escapeHtml(subjectSummary)}</strong></td></tr>
+      </table>
+      <h3 style="color: #0f172a; margin-top: 24px;">Query Details:</h3>
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; white-space: pre-wrap;">${escapeHtml(description)}</div>
+      ${
+        traceback
+          ? `<h3 style="color: #0f172a; margin-top: 24px;">Error Traceback / Server Log:</h3>
+             <pre style="background-color: #0f172a; color: #f8fafc; border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 12px; line-height: 1.5; white-space: pre-wrap;">${escapeHtml(traceback)}</pre>`
+          : ''
+      }
+    </div>
+  `;
+  } else {
+    subject = `[Project Enquiry] ${service} - ${name} (${company || 'Individual'})`;
+
+    emailText = `
 New Project Enquiry - Karnexus Software
 ---------------------------------------
 Client Name: ${name}
@@ -123,24 +203,25 @@ Expected Timeline: ${timeline || 'Not specified'}
 Project Description:
 ${description}
 
-Submitted on: ${new Date().toISOString()}
-  `.trim();
+Submitted on: ${submittedAt}
+    `.trim();
 
-  const emailHtml = `
+    emailHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; line-height: 1.6; color: #1e293b;">
       <h2 style="color: #4338ca; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">New Project Enquiry – Karnexus Software</h2>
       <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
-        <tr><td style="padding: 8px; font-weight: bold; width: 140px;">Client Name:</td><td style="padding: 8px;">${name}</td></tr>
-        <tr><td style="padding: 8px; font-weight: bold;">Work Email:</td><td style="padding: 8px;"><a href="mailto:${email}">${email}</a></td></tr>
-        <tr><td style="padding: 8px; font-weight: bold;">Company:</td><td style="padding: 8px;">${company || 'Not specified'}</td></tr>
-        <tr><td style="padding: 8px; font-weight: bold;">Service Required:</td><td style="padding: 8px;">${service}</td></tr>
-        <tr><td style="padding: 8px; font-weight: bold;">Budget Range:</td><td style="padding: 8px;">${budget || 'Not specified'}</td></tr>
-        <tr><td style="padding: 8px; font-weight: bold;">Timeline:</td><td style="padding: 8px;">${timeline || 'Not specified'}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold; width: 140px;">Client Name:</td><td style="padding: 8px;">${escapeHtml(name)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Work Email:</td><td style="padding: 8px;"><a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Company:</td><td style="padding: 8px;">${escapeHtml(company || 'Not specified')}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Service Required:</td><td style="padding: 8px;">${escapeHtml(service)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Budget Range:</td><td style="padding: 8px;">${escapeHtml(budget || 'Not specified')}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Timeline:</td><td style="padding: 8px;">${escapeHtml(timeline || 'Not specified')}</td></tr>
       </table>
       <h3 style="color: #0f172a; margin-top: 24px;">Project Description:</h3>
-      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; white-space: pre-wrap;">${description}</div>
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; white-space: pre-wrap;">${escapeHtml(description)}</div>
     </div>
   `;
+  }
 
   try {
     const formattedFrom = senderEmail.includes('<')
